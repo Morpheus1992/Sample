@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Simple Map</title>
+    <meta name="viewport" content="initial-scale=1.0">
+    <meta charset="utf-8">
+    <style>
+     /* Always set the map height explicitly to define the size of the div
+       * element that contains the map. */
+      #map {
+        height: 100%;
+      }
+      /* Optional: Makes the sample page fill the window. */
+      html, body {
+        height: 100%;
+        margin: 0;
+        padding: 0;
+      }
+	  
+	  
+	   #floating-panel {
+        position: absolute;
+        top: 10px;
+        left: 25%;
+        z-index: 5;
+        background-color: #fff;
+        padding: 5px;
+        border: 1px solid #999;
+        text-align: center;
+        font-family: 'Roboto','sans-serif';
+        line-height: 30px;
+        padding-left: 10px;
+      }
+      #warnings-panel {
+        width: 100%;
+        height:10%;
+        text-align: center;
+      }
+	  
+	  
+	    #right {
+        font-family: 'Roboto','sans-serif';
+        line-height: 30px;
+        padding-left: 10px;
+      }
+
+      #right select, #right-panel input {
+        font-size: 15px;
+      }
+
+      #right select {
+        width: 100%;
+      }
+
+      #right i {
+        font-size: 12px;
+      }
+      #right {
+        height: 100%;
+        float: right;
+        width: 390px;
+        overflow: auto;
+      }
+  
+      #floating-panel {
+        background: #fff;
+        padding: 5px;
+        font-size: 14px;
+        font-family: Arial;
+        border: 1px solid #ccc;
+        box-shadow: 0 2px 2px rgba(33, 33, 33, 0.4);
+        display: none;
+      }
+    
+        #right {
+          float: none;
+          width: auto;
+        }
+		
+		
+		 #panel {
+        position: absolute;
+        top: 10px;
+        left: 25%;
+        z-index: 5;
+        background-color: #fff;
+        padding: 5px;
+        border: 1px solid #999;
+        text-align: center;
+        font-family: 'Roboto','sans-serif';
+        line-height: 30px;
+        padding-left: 10px;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="map"></div>
+	<div id="pano"></div>
+	
+	 <div id="floating-panel">
+	  <b>Start: </b>
+	  <input id="adress" placeholder="Enter an adress" type="textbox">
+     </select>
+    <b>End: </b>
+	  <input id="end" placeholder="click on a marker" type="textbox">
+	  <button id="but" type="button">Submit</button>
+	  <button id="agu" type="button">geocode </button>
+     </select>
+    </div>
+	
+	<div id="right"></div>
+	<div id="warnings-panel"></div>
+	
+	
+	
+	<div id="cool">
+	<input type="textbox" id="out"></input>
+	</div>
+	
+	<input id="pac" class="controls" type="text" placeholder="Search Box">
+	
+	
+	
+	
+      
+    
+	
+	
+	
+	 
+
+	 
+
+    <script>
+	//we want to create a map and center in on the city of atlanta
+	
+	
+	var enter;
+ //we will use this to see the street view of the marker
+	
+      
+      function initMap() {
+	  var map;
+			var latGSU = 33.754711;
+            var lngGSU = -84.388068;
+        map = new google.maps.Map(document.getElementById('map'), {
+          center: {lat: latGSU, lng: lngGSU},
+          zoom: 14
+        });
+
+	  
+	  
+	  //now we have to add a layer for the map
+	  //we add a layer from the fusion table 
+	  
+	  
+        var layer = new google.maps.FusionTablesLayer({
+          query: {
+            select: 'Geocodable address',
+            from: '1FjVvT2lxm_meECyU7Mn1TaZOvvwu3rJnpZztPqvr'
+          }
+        });
+	            layer.setMap(map);
+				
+				//set up the floating panel for the map
+				var control = document.getElementById('floating-panel');
+        control.style.display = 'block';
+        map.controls[google.maps.ControlPosition.TOP_CENTER].push(control);
+		
+		
+		
+		
+		
+		//now we have to create a render for directions and attach it to the map
+		//create a directions service
+		
+			var directionsService = new google.maps.DirectionsService;
+			var directionsDisplay = new google.maps.DirectionsRenderer;
+			
+			//test to make sure input gets adress
+			//display the adress on the map
+			
+			//var coco = document.getElementById('cool');
+			// coco.style.display = 'HORIZONTAL_BAR';
+			//map.controls[google.maps.ControlPosition.BOTTOM_CENTER].push(coco);
+			 
+			
+			//now we want to get the input of the adresss
+			
+			
+
+			//var input = "AGU";
+		
+			//document.getElementById("cool").innerHTML = input;
+			
+			
+			
+			
+			
+			//we put in a layer listener for the layer
+			
+		layer.addListener('click', function (event) {
+		console.log(event);
+		console.log(event.row.Address.value);
+                // The "event" object contains lots of information about the fusion table.
+                document.getElementById('end').value = event.row.Address.value;
+				enter = event.row.Address.value;
+            });
+			
+			
+			//now we set up the directions display
+			
+			//here is the direction display
+			directionsDisplay.setMap(map);
+	        directionsDisplay.setPanel(document.getElementById('right'));
+			
+			
+			
+			var onChangeHandler = function() {
+				calculateAndDisplayRoute(directionsService, directionsDisplay);
+			};
+			
+			document.getElementById('but').addEventListener('click', onChangeHandler);
+			
+			
+			//this is to center the map here
+			//var set=function()
+			//{
+			//	theCenter();
+			
+			
+			
+			//};
+			
+		//	document.getElementById('but').addEventListener('click', set);
+			
+			
+			
+		//create a panorama
+		 var atlanta = { lat: 33.754711, lng: -84.388068 };
+		
+		 var panorama = new google.maps.StreetViewPanorama(
+                document.getElementById('pano'), {
+                    position: atlanta,
+                    pov: {
+                        heading: 34,
+                        pitch: 10
+                    }
+                });
+            map.setStreetView(panorama);
+		
+		
+		
+			//create a place searchobx
+			
+			 var input = document.getElementById('end');
+        var searchBox = new google.maps.places.SearchBox(input);
+		
+        //map.controls[google.maps.ControlPosition.BOTTOM_RIGHT].push(input);
+			
+			
+			
+			
+			//here we will set up a geocode for the adress
+			 
+			 
+			 
+			 //we go to the geocoder function
+			  var geocoder = new google.maps.Geocoder();
+			 document.getElementById('agu').addEventListener('click', function() {
+          geocodeAddress(geocoder, map);
+        });
+		
+		
+	   
+	   
+	}
+
+		//here we get the directions from the market to the adress
+         
+	   function calculateAndDisplayRoute(directionsService, directionsDisplay) {
+        var start = document.getElementById('adress').value;
+        var end = document.getElementById('end').value;
+        directionsService.route({
+          origin: start,
+          destination: end,
+          travelMode: 'DRIVING'
+        }, function(response, status) {
+          if (status === 'OK') {
+            directionsDisplay.setDirections(response);
+          } else {
+            window.alert('Directions request failed due to ' + status);
+          }
+        });
+	 
+	  }
+	  
+	  //we are setting the map to center
+	  //this center the map at the adress
+	  //
+	  //function theCenter()
+	//  {
+	//	var center=document.getElementById('adress').value;
+	//	map.setCenter(center);
+	  
+	  
+	//  }
+	  
+	  
+	  //we try to set a marker at the adress
+	 //place markers here
+	  //use searchbox here
+	    function geocodeAddress(geocoder, resultsMap) {
+        var where = document.getElementById('adress').value;
+        geocoder.geocode({'address': where}, function(results, status) {
+          if (status === 'OK') {
+            resultsMap.setCenter(results[0].geometry.location);
+            var marker = new google.maps.Marker({
+              map: resultsMap,
+              position: results[0].geometry.location
+            });
+          } else {
+            alert('Geocode was not successful for the following reason: ' + status);
+          }
+        });
+		
+		//start here with marker add them here
+      }
+	  
+	  
+	  
+	  
+	  
+	  
+    </script>
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAtxRRlERMxF-AATRlMB2krkTNbBMC3oas&libraries=places&callback=initMap"
+    async defer></script>
+  </body>
+</html>
+    
+  
+  
+  
+  
